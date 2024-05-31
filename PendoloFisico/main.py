@@ -30,8 +30,14 @@ buco = {
     "buco_10": [16.49, 16.42, 16.43, 16.45, 16.46, 16.37, 16.43]
 }
 
-T = np.array([np.mean(buco[el]) for el in buco]) / 10
+# Calculate mean and error for each buco
+T = np.array([calculate_mean_and_error(buco[el])[0] for el in buco]) / 10
 err_T = np.array([calculate_mean_and_error(buco[el])[1] for el in buco]) / 10
+
+# Print the period and its associated error for each buco
+for i, key in enumerate(buco.keys()):
+    mean, sigma = calculate_mean_and_error(buco[key])
+    print(f"{key}: Periodo medio = {mean/10:.3f} s, Errore = {sigma/10:.3f} s")
 
 # Define the model and its derivative
 def period_model(d, l):
@@ -49,22 +55,33 @@ for i in range(100):
 # Calculate residuals
 res = T - period_model(d, *popt)
 
-# Plot the data and the best-fit model
+# Calcolo del chi^2 e del chi^2 ridotto
+chi2 = np.sum(((T - period_model(d, popt[0]))**2) / (err_T**2))
+dof = len(T) - len(popt)  # Gradi di libertà
+chi2_reduced = chi2 / dof
+
+# Creazione della figura
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, gridspec_kw=dict(height_ratios=[2, 1], hspace=0.05))
 
+# Plot principale: dati e modello di best-fit
 ax1.errorbar(d, T, err_T, fmt="o", label="Dati")
 xgrid = np.linspace(0.0, 0.5, 100)
-ax1.plot(xgrid, period_model(xgrid, *popt), label="Modello di best-fit")
+ax1.plot(xgrid, period_model(xgrid, *popt), label=f'Best-fit model (χ² ridotto: {chi2_reduced:.2f})', color="orange")
 ax1.set_ylabel("T [s]")
 ax1.grid(color="lightgray", ls="dashed")
 ax1.legend()
 
+# Titolo del grafico principale
+ax1.set_title(f"Fit per la stima dell'indice con χ²: {chi2:.2f}, Gradi di Libertà: {dof}")
+
+# Plot dei residui
 ax2.errorbar(d, res, err_T, fmt="o")
-ax2.plot(xgrid, np.zeros_like(xgrid))
+ax2.plot(xgrid, np.zeros_like(xgrid), color='orange')
 ax2.set_xlabel("d [m]")
 ax2.set_ylabel("Residui [s]")
 ax2.grid(color="lightgray", ls="dashed")
 
+# Finalizzazione del grafico
 plt.xlim(0.0, 0.5)
 fig.align_ylabels((ax1, ax2))
 plt.savefig("Fit_e_residui.pdf")
