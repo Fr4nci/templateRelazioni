@@ -5,18 +5,20 @@ from scipy.stats import chi2
 # Dati
 p = np.array([11.1, 10.2, 12.8, 14.8, 9.7, 16.4, 19.5, 11.2])
 q = np.array([16.2, 18.3, 17.3, 15.8, 17.7, 15.3, 14.7, 16.6])
+p = p * 10 ** (-2)
+q = q * 10 ** (-2)
 sigma = 0.01
-# Calcolo delle variabili P e Q
-P = (1./p)
-Q = (1./q)
+# Calcolo delle variabili P e Q 
+P = np.power(p, -1)
+Q = np.power(q, -1)
 
 # Propagazione degli errori
-sigma_Q = 1 * (0.5 / q**2)
-sigma_P =  (0.5 / p**2)
+sigma_Q = 1 * ((0.5 * 10**(-2))/ q**2)
+sigma_P =  (0.5 * 10**(-2)/ p**2)
 
 # Definizione del modello
-def model(P, m, F):
-    return F - m * P
+def model(x, m, F):
+    return F + m * x
 
 # Ottimizzazione del fit
 popt, pcov = curve_fit(model, P, Q, sigma=sigma_Q)
