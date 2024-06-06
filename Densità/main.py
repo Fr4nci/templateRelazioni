@@ -6,8 +6,8 @@ from scipy.optimize import curve_fit
 #    'text.usetex': True,
 #    'text.latex.preamble': r'\usepackage{amsfonts, siunitx}'
 #})
-def mod_d(x, m, q):
-    return( m*x + q)
+def mod_d(x, m):
+    return( m*x)
 
 
 print(np.pi)
@@ -91,11 +91,11 @@ alluminio_m = np.array(alluminio_m, dtype=np.float64)
 alluminio_sigma_m = np.array(alluminio_sigma_m, dtype=np.float64)
 
 # Grafico e modello di best-fit alluminio
-popt, pcov = curve_fit(mod_d, alluminio_m, alluminio_v, [1./2.710, 0], sigma=alluminio_sigma_v)
+popt, pcov = curve_fit(mod_d, alluminio_m, alluminio_v, [1./2.710], sigma=alluminio_sigma_v)
 sigma_eff = alluminio_sigma_v
 for i in range(10):
     sigma_eff = np.sqrt(np.power(alluminio_sigma_v, 2) + np.power((1./popt[0]) * alluminio_sigma_m, 2))
-    popt, pcov = curve_fit(mod_d, alluminio_m, alluminio_v, [1./2.710, 0], sigma=sigma_eff)
+    popt, pcov = curve_fit(mod_d, alluminio_m, alluminio_v, [1./2.710], sigma=sigma_eff)
     chisq = np.sum(((alluminio_v - mod_d(alluminio_m, *popt))/sigma_eff) ** 2)
     print(f"Step {i}")
     print(popt, np.sqrt(pcov.diagonal()))
